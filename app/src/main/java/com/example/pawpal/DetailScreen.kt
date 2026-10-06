@@ -6,7 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -19,8 +19,13 @@ fun DetailScreen(
     onBackClick: () -> Unit,
     onAddTaskClick: () -> Unit,
     onTaskClick: (Int) -> Unit,
-    onTaskCompletedChange: (Int, Boolean) -> Unit
+    onTaskCompletedChange: (Int, Boolean) -> Unit,
+    onDeletePet: () -> Unit
 ) {
+
+    var showDeleteDialog by remember {
+        mutableStateOf(false)
+    }
 
     val petTasks = tasks.filter {
         it.petId == pet.id
@@ -64,9 +69,11 @@ fun DetailScreen(
                     shape = RoundedCornerShape(28.dp),
                     color = MaterialTheme.colorScheme.primaryContainer
                 ) {
+
                     Box(
                         contentAlignment = Alignment.Center
                     ) {
+
                         Text(
                             text = when (pet.type.lowercase()) {
                                 "dog" -> "🐶"
@@ -82,6 +89,7 @@ fun DetailScreen(
 
             // PET INFORMATION
             item {
+
                 Column {
 
                     Text(
@@ -127,10 +135,12 @@ fun DetailScreen(
             if (petTasks.isEmpty()) {
 
                 item {
+
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(18.dp)
                     ) {
+
                         Text(
                             text = "No care tasks yet",
                             modifier = Modifier.padding(20.dp)
@@ -245,12 +255,81 @@ fun DetailScreen(
                         .height(58.dp),
                     shape = RoundedCornerShape(18.dp)
                 ) {
+
                     Text(
                         text = "+  Add Care Task",
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
             }
+
+            // DELETE PET BUTTON
+            item {
+
+                OutlinedButton(
+                    onClick = {
+                        showDeleteDialog = true
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(58.dp),
+                    shape = RoundedCornerShape(18.dp)
+                ) {
+
+                    Text(
+                        text = "Delete Pet",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
         }
+    }
+
+    // DELETE CONFIRMATION
+    if (showDeleteDialog) {
+
+        AlertDialog(
+            onDismissRequest = {
+                showDeleteDialog = false
+            },
+
+            title = {
+                Text("Delete ${pet.name}?")
+            },
+
+            text = {
+                Text(
+                    "Are you sure you want to delete this pet? " +
+                            "All care tasks for this pet will also be deleted."
+                )
+            },
+
+            confirmButton = {
+
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                        onDeletePet()
+                    }
+                ) {
+
+                    Text(
+                        text = "Delete",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+
+            dismissButton = {
+
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }

@@ -37,8 +37,7 @@ fun PawPalApp() {
         mutableStateOf<Int?>(null)
     }
 
-    // Load pets from local storage.
-    // If nothing was saved yet, use default pets.
+    // Load pets from local storage
     val petList = remember {
         mutableStateListOf<Pet>().apply {
             addAll(
@@ -47,8 +46,7 @@ fun PawPalApp() {
         }
     }
 
-    // Load tasks from local storage.
-    // If nothing was saved yet, use default tasks.
+    // Load tasks from local storage
     val taskList = remember {
         mutableStateListOf<CareTask>().apply {
             addAll(
@@ -163,6 +161,37 @@ fun PawPalApp() {
                                 taskList
                             )
                         }
+                    },
+
+                    onDeletePet = {
+
+                        // Delete all tasks belonging to this pet
+                        taskList.removeAll {
+                            it.petId == pet.id
+                        }
+
+                        // Delete pet
+                        petList.removeAll {
+                            it.id == pet.id
+                        }
+
+                        // Save updated lists
+                        LocalStorage.savePets(
+                            context,
+                            petList
+                        )
+
+                        LocalStorage.saveTasks(
+                            context,
+                            taskList
+                        )
+
+                        // Clear selected IDs
+                        selectedPetId = null
+                        selectedTaskId = null
+
+                        // Return to My Pets
+                        currentScreen = "home"
                     }
                 )
 
@@ -215,7 +244,6 @@ fun PawPalApp() {
                         currentScreen = "detail"
                     }
                 )
-
             } else {
                 currentScreen = "home"
             }
