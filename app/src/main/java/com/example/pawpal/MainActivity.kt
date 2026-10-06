@@ -5,6 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.pawpal.ui.theme.PawPalTheme
 
 class MainActivity : ComponentActivity() {
@@ -24,20 +29,8 @@ class MainActivity : ComponentActivity() {
 fun PawPalApp() {
 
     val context = LocalContext.current
+    val navController = rememberNavController()
 
-    var currentScreen by remember {
-        mutableStateOf("home")
-    }
-
-    var selectedPetId by remember {
-        mutableStateOf<Int?>(null)
-    }
-
-    var selectedTaskId by remember {
-        mutableStateOf<Int?>(null)
-    }
-
-    // Load pets from local storage
     val petList = remember {
         mutableStateListOf<Pet>().apply {
             addAll(
@@ -46,7 +39,6 @@ fun PawPalApp() {
         }
     }
 
-    // Load tasks from local storage
     val taskList = remember {
         mutableStateListOf<CareTask>().apply {
             addAll(
@@ -55,24 +47,26 @@ fun PawPalApp() {
         }
     }
 
-    when (currentScreen) {
+    NavHost(
+        navController = navController,
+        startDestination = "home"
+    ) {
 
         // =========================
         // HOME
         // =========================
 
-        "home" -> {
+        composable("home") {
 
             HomeScreen(
                 pets = petList,
 
                 onPetClick = { petId ->
-                    selectedPetId = petId
-                    currentScreen = "detail"
+                    navController.navigate("detail/$petId")
                 },
 
                 onAddPetClick = {
-                    currentScreen = "addPet"
+                    navController.navigate("addPet")
                 }
             )
         }
@@ -81,11 +75,12 @@ fun PawPalApp() {
         // ADD PET
         // =========================
 
-        "addPet" -> {
+        composable("addPet") {
 
             AddPetScreen(
+
                 onBackClick = {
-                    currentScreen = "home"
+                    navController.popBackStack()
                 },
 
                 onSavePet = { name, type, breed, age ->
@@ -108,7 +103,7 @@ fun PawPalApp() {
                         petList
                     )
 
-                    currentScreen = "home"
+                    navController.popBackStack()
                 }
             )
         }
@@ -117,10 +112,20 @@ fun PawPalApp() {
         // PET DETAILS
         // =========================
 
-        "detail" -> {
+        composable(
+            route = "detail/{petId}",
+            arguments = listOf(
+                navArgument("petId") {
+                    type = NavType.IntType
+                }
+            )
+        ) { backStackEntry ->
+
+            val petId =
+                backStackEntry.arguments?.getInt("petId")
 
             val pet = petList.find {
-                it.id == selectedPetId
+                it.id == petId
             }
 
             if (pet != null) {
@@ -130,17 +135,19 @@ fun PawPalApp() {
                     tasks = taskList,
 
                     onBackClick = {
-                        currentScreen = "home"
+                        navController.popBackStack()
                     },
 
                     onAddTaskClick = {
-                        selectedTaskId = null
-                        currentScreen = "addTask"
+                        navController.navigate(
+                            "addTask/${pet.id}"
+                        )
                     },
 
                     onTaskClick = { taskId ->
-                        selectedTaskId = taskId
-                        currentScreen = "editTask"
+                        navController.navigate(
+                            "editTask/${pet.id}/$taskId"
+                        )
                     },
 
                     onTaskCompletedChange = { taskId, completed ->
@@ -165,17 +172,14 @@ fun PawPalApp() {
 
                     onDeletePet = {
 
-                        // Delete all tasks belonging to this pet
                         taskList.removeAll {
                             it.petId == pet.id
                         }
 
-                        // Delete pet
                         petList.removeAll {
                             it.id == pet.id
                         }
 
-                        // Save updated lists
                         LocalStorage.savePets(
                             context,
                             petList
@@ -186,17 +190,9 @@ fun PawPalApp() {
                             taskList
                         )
 
-                        // Clear selected IDs
-                        selectedPetId = null
-                        selectedTaskId = null
-
-                        // Return to My Pets
-                        currentScreen = "home"
+                        navController.popBackStack()
                     }
                 )
-
-            } else {
-                currentScreen = "home"
             }
         }
 
@@ -204,10 +200,20 @@ fun PawPalApp() {
         // ADD TASK
         // =========================
 
-        "addTask" -> {
+        composable(
+            route = "addTask/{petId}",
+            arguments = listOf(
+                navArgument("petId") {
+                    type = NavType.IntType
+                }
+            )
+        ) { backStackEntry ->
+
+            val petId =
+                backStackEntry.arguments?.getInt("petId")
 
             val pet = petList.find {
-                it.id == selectedPetId
+                it.id == petId
             }
 
             if (pet != null) {
@@ -217,7 +223,7 @@ fun PawPalApp() {
                     existingTask = null,
 
                     onBackClick = {
-                        currentScreen = "detail"
+                        navController.popBackStack()
                     },
 
                     onSaveTask = { title, time, notes ->
@@ -241,11 +247,9 @@ fun PawPalApp() {
                             taskList
                         )
 
-                        currentScreen = "detail"
+                        navController.popBackStack()
                     }
                 )
-            } else {
-                currentScreen = "home"
             }
         }
 
@@ -253,14 +257,30 @@ fun PawPalApp() {
         // EDIT TASK
         // =========================
 
-        "editTask" -> {
+        composable(
+            route = "editTask/{petId}/{taskId}",
+            arguments = listOf(
+                navArgument("petId") {
+                    type = NavType.IntType
+                },
+                navArgument("taskId") {
+                    type = NavType.IntType
+                }
+            )
+        ) { backStackEntry ->
+
+            val petId =
+                backStackEntry.arguments?.getInt("petId")
+
+            val taskId =
+                backStackEntry.arguments?.getInt("taskId")
 
             val pet = petList.find {
-                it.id == selectedPetId
+                it.id == petId
             }
 
             val task = taskList.find {
-                it.id == selectedTaskId
+                it.id == taskId
             }
 
             if (pet != null && task != null) {
@@ -270,8 +290,7 @@ fun PawPalApp() {
                     existingTask = task,
 
                     onBackClick = {
-                        selectedTaskId = null
-                        currentScreen = "detail"
+                        navController.popBackStack()
                     },
 
                     onSaveTask = { title, time, notes ->
@@ -295,8 +314,7 @@ fun PawPalApp() {
                             )
                         }
 
-                        selectedTaskId = null
-                        currentScreen = "detail"
+                        navController.popBackStack()
                     },
 
                     onDeleteTask = {
@@ -310,14 +328,9 @@ fun PawPalApp() {
                             taskList
                         )
 
-                        selectedTaskId = null
-                        currentScreen = "detail"
+                        navController.popBackStack()
                     }
                 )
-
-            } else {
-                selectedTaskId = null
-                currentScreen = "detail"
             }
         }
     }
