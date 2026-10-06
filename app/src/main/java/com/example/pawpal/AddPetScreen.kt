@@ -1,5 +1,8 @@
 package com.example.pawpal
 
+import android.content.res.Configuration
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.pawpal.ui.theme.PawPalTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -211,5 +214,37 @@ fun AddPetScreen(
                 modifier = Modifier.height(20.dp)
             )
         }
+    }
+}
+@Preview(
+    name = "Add Pet Light",
+    showBackground = true
+)
+@Composable
+fun AddPetScreenLightPreview() {
+    PawPalTheme(
+        darkTheme = false
+    ) {
+        AddPetScreen(
+            onBackClick = {},
+            onSavePet = { _, _, _, _ -> }
+        )
+    }
+}
+
+@Preview(
+    name = "Add Pet Dark",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
+@Composable
+fun AddPetScreenDarkPreview() {
+    PawPalTheme(
+        darkTheme = true
+    ) {
+        AddPetScreen(
+            onBackClick = {},
+            onSavePet = { _, _, _, _ -> }
+        )
     }
 }

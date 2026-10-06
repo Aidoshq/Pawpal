@@ -1,5 +1,8 @@
 package com.example.pawpal
 
+import android.content.res.Configuration
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.pawpal.ui.theme.PawPalTheme
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -19,6 +23,7 @@ fun PetCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -60,28 +65,37 @@ fun PetCard(
                 modifier = Modifier.weight(1f)
             ) {
 
+                // PET NAME
                 Text(
                     text = pet.name,
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 Spacer(
                     modifier = Modifier.height(4.dp)
                 )
 
+                // PET TYPE
                 Text(
                     text = pet.type,
                     color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.titleSmall
+                    style = MaterialTheme.typography.titleSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 Spacer(
                     modifier = Modifier.height(6.dp)
                 )
 
+                // BREED AND AGE
                 Text(
                     text = "${pet.breed} · ${pet.age}",
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
 
@@ -91,5 +105,53 @@ fun PetCard(
                 style = MaterialTheme.typography.headlineMedium
             )
         }
+    }
+}
+@Preview(
+    name = "Pet Card Light",
+    showBackground = true
+)
+@Composable
+fun PetCardLightPreview() {
+
+    PawPalTheme(
+        darkTheme = false
+    ) {
+
+        PetCard(
+            pet = Pet(
+                id = 1,
+                name = "Milo",
+                type = "Dog",
+                age = "2 years",
+                breed = "Golden Retriever"
+            ),
+            onClick = {}
+        )
+    }
+}
+
+@Preview(
+    name = "Pet Card Dark",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
+@Composable
+fun PetCardDarkPreview() {
+
+    PawPalTheme(
+        darkTheme = true
+    ) {
+
+        PetCard(
+            pet = Pet(
+                id = 1,
+                name = "Milo",
+                type = "Dog",
+                age = "2 years",
+                breed = "Golden Retriever"
+            ),
+            onClick = {}
+        )
     }
 }

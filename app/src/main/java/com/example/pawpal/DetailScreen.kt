@@ -1,5 +1,8 @@
 package com.example.pawpal
 
+import android.content.res.Configuration
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.pawpal.ui.theme.PawPalTheme
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -330,6 +333,56 @@ fun DetailScreen(
                     Text("Cancel")
                 }
             }
+        )
+    }
+}
+@Preview(
+    name = "Detail Screen Light",
+    showBackground = true
+)
+@Composable
+fun DetailScreenLightPreview() {
+    PawPalTheme(darkTheme = false) {
+        DetailScreen(
+            pet = Pet(
+                id = 1,
+                name = "Milo",
+                type = "Dog",
+                age = "2 years",
+                breed = "Golden Retriever"
+            ),
+            tasks = emptyList(),
+            onBackClick = {},
+            onAddTaskClick = {},
+            onTaskClick = {},
+            onTaskCompletedChange = { _, _ -> },
+            onDeletePet = {}
+        )
+    }
+}
+
+@Preview(
+    name = "Detail Screen Dark",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
+@Composable
+fun DetailScreenDarkPreview() {
+    PawPalTheme(darkTheme = true) {
+        DetailScreen(
+            pet = Pet(
+                id = 1,
+                name = "Milo",
+                type = "Dog",
+                age = "2 years",
+                breed = "Golden Retriever"
+            ),
+            tasks = emptyList(),
+            onBackClick = {},
+            onAddTaskClick = {},
+            onTaskClick = {},
+            onTaskCompletedChange = { _, _ -> },
+            onDeletePet = {}
         )
     }
 }

@@ -1,5 +1,8 @@
 package com.example.pawpal
 
+import android.content.res.Configuration
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.pawpal.ui.theme.PawPalTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -205,5 +208,49 @@ fun CareTaskScreen(
                 modifier = Modifier.height(20.dp)
             )
         }
+    }
+}
+@Preview(
+    name = "Care Task Light",
+    showBackground = true
+)
+@Composable
+fun CareTaskScreenLightPreview() {
+    PawPalTheme(darkTheme = false) {
+        CareTaskScreen(
+            pet = Pet(
+                id = 1,
+                name = "Milo",
+                type = "Dog",
+                age = "2 years",
+                breed = "Golden Retriever"
+            ),
+            existingTask = null,
+            onBackClick = {},
+            onSaveTask = { _, _, _ -> }
+        )
+    }
+}
+
+@Preview(
+    name = "Care Task Dark",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
+@Composable
+fun CareTaskScreenDarkPreview() {
+    PawPalTheme(darkTheme = true) {
+        CareTaskScreen(
+            pet = Pet(
+                id = 1,
+                name = "Milo",
+                type = "Dog",
+                age = "2 years",
+                breed = "Golden Retriever"
+            ),
+            existingTask = null,
+            onBackClick = {},
+            onSaveTask = { _, _, _ -> }
+        )
     }
 }
