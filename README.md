@@ -48,3 +48,5 @@ For SIS1, the initial Android project has been created and deployed to GitHub. T
 The main application features will be implemented during the next development stages.
 SIS 3
 I used Kotlin, Jetpack Compose and Android Studio. I also used Git and GitHub for version control.
+
+
