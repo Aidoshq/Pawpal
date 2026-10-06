@@ -39,6 +39,9 @@ Task Completed
 - Git
 - GitHub
 
+update: sis3
+  My Pets → Pet Profile → Pet Info / Care Tasks → Add Task → Complete Task.
+
 ## Current Project Status
 For SIS1, the initial Android project has been created and deployed to GitHub. The project idea, main user flow, and planned functionality have been defined.
 
