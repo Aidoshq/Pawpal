@@ -1,56 +1,37 @@
-# AI Usage
+## SIS4: AI Usage for MVVM
 
-## AI Tools Used
+For SIS4, I used ChatGPT to understand MVVM architecture because I was not familiar with it before.
 
-During the development of PawPal, I used ChatGPT as an AI assistant.
+AI helped me understand the difference between View, ViewModel, and Repository. It also helped me work with StateFlow, UiState, and the Android lifecycle.
 
-AI was mainly used for:
-- explaining Jetpack Compose concepts;
-- debugging Kotlin and Compose errors;
-- suggesting UI improvements;
-- helping with Navigation Compose;
-- reviewing and improving code structure.
+### Example Prompts
 
-## Example Prompts
+**Prompt 4:** "What is MVVM, and how can I use it in my PawPal application?"
 
-### Prompt 1
-"How can I create navigation between HomeScreen and DetailScreen using Navigation Compose and pass the pet ID?"
+This helped me understand how to separate UI, logic, and data.
 
-This helped me implement Navigation Compose with route arguments.
+**Prompt 5:** "How can I use StateFlow and UiState to manage search, filtering, and loading states?"
 
-### Prompt 2
-"How can I create a reusable pet card in Jetpack Compose with an image, pet name, breed, and age?"
+This helped me move the home screen logic into HomeViewModel.
 
-This helped with the structure of the reusable PetCard component.
+**Prompt 6:** "Why does my Simulate Loading Error button not work?"
 
-### Prompt 3
-"How can I add light and dark mode previews for my Jetpack Compose screens?"
+The button was visible, but nothing happened when I clicked it.
 
-This helped me create @Preview functions for both light and dark themes.
+### AI Error and Fix in SIS4
 
-## AI Error and Fix
+When I added the Simulate Loading Error button, the callback was not connected correctly.
 
-During development, AI-generated code did not always work correctly on the first attempt.
+HomeScreen had an `onSimulateError` callback, but HomeRoute did not pass the ViewModel function to it.
 
-One issue occurred when changes were made to the DetailScreen parameters without updating all calls to DetailScreen in MainActivity. This caused compilation errors.
+I fixed this by connecting `homeViewModel::simulateError` in HomeRoute. I also connected `homeViewModel::retryAfterError` to the Retry button.
 
-I fixed the problem by checking the function parameters and updating the corresponding Navigation Compose callbacks in MainActivity.
+After that, I tested both buttons in the emulator, and they worked.
 
-Another issue was a large pet placeholder image that caused a Canvas bitmap error. I fixed it by resizing the image before using it in the Compose UI.
+### What I Tested
 
-## Manual Changes
+I tested searching, filtering, sorting, loading, empty state, error state, and Retry.
 
-I reviewed and modified the AI-generated code manually.
+I also rotated the emulator to check if the search text and selected filter would stay the same. They did, because the state was kept in HomeViewModel.
 
-Some of the changes I made include:
-- adjusting the PawPal screen layout;
-- changing text and labels;
-- choosing the final color scheme;
-- testing light and dark modes;
-- testing pet creation and deletion;
-- testing care task creation, editing, completion, and deletion;
-- checking navigation between screens;
-- organizing the project files;
-- testing the application on the Android emulator.
-
-AI was used as a development assistant, but the final application was tested and adjusted manually.
+This task helped me understand why it is better to keep screen logic in the ViewModel instead of putting everything inside composable functions.
