@@ -31,7 +31,7 @@ fun HomeScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text("🐾 PawPal")
+                    Text("🐾  PawPal")
                 }
             )
         }
