@@ -1,9 +1,12 @@
+
 package com.example.pawpal
 
+import android.content.Context
 import kotlinx.coroutines.delay
 
-class PetRepository {
-
+class PetRepository(
+    private val context: Context
+) {
     var shouldFail = false
 
     suspend fun getPets(): List<Pet> {
@@ -13,6 +16,19 @@ class PetRepository {
             throw Exception("Failed to load pets")
         }
 
-        return emptyList()
+        return LocalStorage.loadPets(context) ?: pets
+    }
+
+    suspend fun savePets(pets: List<Pet>) {
+        LocalStorage.savePets(context, pets)
+    }
+
+    suspend fun getTasks(): List<CareTask> {
+        delay(300)
+        return LocalStorage.loadTasks(context) ?: careTasks
+    }
+
+    suspend fun saveTasks(tasks: List<CareTask>) {
+        LocalStorage.saveTasks(context, tasks)
     }
 }

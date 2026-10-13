@@ -1,10 +1,13 @@
+
 package com.example.pawpal
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -17,11 +20,38 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        Log.d("PawPalLifecycle", "Activity onCreate")
+
         setContent {
             PawPalTheme {
                 PawPalApp()
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.d("PawPalLifecycle", "Activity onStart")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("PawPalLifecycle", "Activity onResume")
+    }
+
+    override fun onPause() {
+        Log.d("PawPalLifecycle", "Activity onPause")
+        super.onPause()
+    }
+
+    override fun onStop() {
+        Log.d("PawPalLifecycle", "Activity onStop")
+        super.onStop()
+    }
+
+    override fun onDestroy() {
+        Log.d("PawPalLifecycle", "Activity onDestroy")
+        super.onDestroy()
     }
 }
 
@@ -31,19 +61,17 @@ fun PawPalApp() {
     val context = LocalContext.current
     val navController = rememberNavController()
 
+    val homeViewModel: HomeViewModel = viewModel()
+
     val petList = remember {
         mutableStateListOf<Pet>().apply {
-            addAll(
-                LocalStorage.loadPets(context) ?: pets
-            )
+            addAll(LocalStorage.loadPets(context) ?: pets)
         }
     }
 
     val taskList = remember {
         mutableStateListOf<CareTask>().apply {
-            addAll(
-                LocalStorage.loadTasks(context) ?: careTasks
-            )
+            addAll(LocalStorage.loadTasks(context) ?: careTasks)
         }
     }
 
@@ -52,37 +80,25 @@ fun PawPalApp() {
         startDestination = "home"
     ) {
 
-        // =========================
         // HOME
-        // =========================
-
         composable("home") {
-
-            HomeScreen(
-                pets = petList,
-
+            HomeRoute(
+                homeViewModel = homeViewModel,
                 onPetClick = { petId ->
                     navController.navigate("detail/$petId")
                 },
-
                 onAddPetClick = {
                     navController.navigate("addPet")
                 }
             )
         }
 
-        // =========================
         // ADD PET
-        // =========================
-
         composable("addPet") {
-
             AddPetScreen(
-
                 onBackClick = {
                     navController.popBackStack()
                 },
-
                 onSavePet = { name, type, breed, age ->
 
                     val newId =
@@ -97,21 +113,16 @@ fun PawPalApp() {
                     )
 
                     petList.add(newPet)
+                    homeViewModel.addPet(newPet)
 
-                    LocalStorage.savePets(
-                        context,
-                        petList
-                    )
+                    LocalStorage.savePets(context, petList)
 
                     navController.popBackStack()
                 }
             )
         }
 
-        // =========================
         // PET DETAILS
-        // =========================
-
         composable(
             route = "detail/{petId}",
             arguments = listOf(
@@ -121,15 +132,10 @@ fun PawPalApp() {
             )
         ) { backStackEntry ->
 
-            val petId =
-                backStackEntry.arguments?.getInt("petId")
-
-            val pet = petList.find {
-                it.id == petId
-            }
+            val petId = backStackEntry.arguments?.getInt("petId")
+            val pet = petList.find { it.id == petId }
 
             if (pet != null) {
-
                 DetailScreen(
                     pet = pet,
                     tasks = taskList,
@@ -139,9 +145,7 @@ fun PawPalApp() {
                     },
 
                     onAddTaskClick = {
-                        navController.navigate(
-                            "addTask/${pet.id}"
-                        )
+                        navController.navigate("addTask/${pet.id}")
                     },
 
                     onTaskClick = { taskId ->
@@ -151,13 +155,11 @@ fun PawPalApp() {
                     },
 
                     onTaskCompletedChange = { taskId, completed ->
-
                         val index = taskList.indexOfFirst {
                             it.id == taskId
                         }
 
                         if (index != -1) {
-
                             taskList[index] =
                                 taskList[index].copy(
                                     isCompleted = completed
@@ -171,7 +173,6 @@ fun PawPalApp() {
                     },
 
                     onDeletePet = {
-
                         taskList.removeAll {
                             it.petId == pet.id
                         }
@@ -179,6 +180,8 @@ fun PawPalApp() {
                         petList.removeAll {
                             it.id == pet.id
                         }
+
+                        homeViewModel.deletePet(pet.id)
 
                         LocalStorage.savePets(
                             context,
@@ -196,10 +199,7 @@ fun PawPalApp() {
             }
         }
 
-        // =========================
         // ADD TASK
-        // =========================
-
         composable(
             route = "addTask/{petId}",
             arguments = listOf(
@@ -209,15 +209,10 @@ fun PawPalApp() {
             )
         ) { backStackEntry ->
 
-            val petId =
-                backStackEntry.arguments?.getInt("petId")
-
-            val pet = petList.find {
-                it.id == petId
-            }
+            val petId = backStackEntry.arguments?.getInt("petId")
+            val pet = petList.find { it.id == petId }
 
             if (pet != null) {
-
                 CareTaskScreen(
                     pet = pet,
                     existingTask = null,
@@ -253,10 +248,7 @@ fun PawPalApp() {
             }
         }
 
-        // =========================
         // EDIT TASK
-        // =========================
-
         composable(
             route = "editTask/{petId}/{taskId}",
             arguments = listOf(
@@ -269,22 +261,13 @@ fun PawPalApp() {
             )
         ) { backStackEntry ->
 
-            val petId =
-                backStackEntry.arguments?.getInt("petId")
+            val petId = backStackEntry.arguments?.getInt("petId")
+            val taskId = backStackEntry.arguments?.getInt("taskId")
 
-            val taskId =
-                backStackEntry.arguments?.getInt("taskId")
-
-            val pet = petList.find {
-                it.id == petId
-            }
-
-            val task = taskList.find {
-                it.id == taskId
-            }
+            val pet = petList.find { it.id == petId }
+            val task = taskList.find { it.id == taskId }
 
             if (pet != null && task != null) {
-
                 CareTaskScreen(
                     pet = pet,
                     existingTask = task,
@@ -300,7 +283,6 @@ fun PawPalApp() {
                         }
 
                         if (index != -1) {
-
                             taskList[index] =
                                 task.copy(
                                     title = title,
@@ -318,7 +300,6 @@ fun PawPalApp() {
                     },
 
                     onDeleteTask = {
-
                         taskList.removeAll {
                             it.id == task.id
                         }

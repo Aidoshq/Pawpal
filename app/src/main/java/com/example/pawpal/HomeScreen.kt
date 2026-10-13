@@ -1,3 +1,4 @@
+
 package com.example.pawpal
 
 import android.content.res.Configuration
@@ -16,9 +17,14 @@ import com.example.pawpal.ui.theme.PawPalTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    pets: List<Pet>,
+    uiState: HomeUiState,
     onPetClick: (Int) -> Unit,
-    onAddPetClick: () -> Unit
+    onAddPetClick: () -> Unit,
+    onSearchChange: (String) -> Unit,
+    onTypeSelected: (String) -> Unit,
+    onSortClick: () -> Unit,
+    onRetry: () -> Unit,
+    onSimulateError: () -> Unit = {}
 ) {
     val careTips = listOf(
         "🍽️ Feeding",
@@ -30,9 +36,7 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text("🐾  PawPal")
-                }
+                title = { Text("🐾  PawPal") }
             )
         }
     ) { innerPadding ->
@@ -59,31 +63,23 @@ fun HomeScreen(
                         style = MaterialTheme.typography.labelLarge
                     )
 
-                    Spacer(
-                        modifier = Modifier.height(8.dp)
-                    )
+                    Spacer(Modifier.height(8.dp))
 
                     Text(
                         text = "My Pets",
                         style = MaterialTheme.typography.headlineLarge
                     )
 
-                    Spacer(
-                        modifier = Modifier.height(6.dp)
-                    )
+                    Spacer(Modifier.height(6.dp))
 
                     Text(
                         text = "Take care of your little friends",
                         style = MaterialTheme.typography.bodyLarge
                     )
-
-                    Spacer(
-                        modifier = Modifier.height(12.dp)
-                    )
                 }
             }
 
-            // PET CARE TITLE
+            // PET CARE
             item {
                 Text(
                     text = "Pet Care",
@@ -91,7 +87,6 @@ fun HomeScreen(
                 )
             }
 
-            // HORIZONTAL LIST
             item {
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -104,45 +99,115 @@ fun HomeScreen(
 
             // PET LIST TITLE
             item {
-                Spacer(
-                    modifier = Modifier.height(6.dp)
-                )
-
                 Text(
                     text = "Your Pets",
                     style = MaterialTheme.typography.titleLarge
                 )
             }
 
-            // EMPTY STATE
-            if (pets.isEmpty()) {
+            // SEARCH
+            item {
+                OutlinedTextField(
+                    value = uiState.searchQuery,
+                    onValueChange = onSearchChange,
+                    label = { Text("Search pets") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
-                item {
-                    EmptyPetsState()
+            // FILTER
+            item {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(
+                        listOf("All", "Dog", "Cat", "Bird", "Other")
+                    ) { type ->
+                        FilterChip(
+                            selected = uiState.selectedType == type,
+                            onClick = { onTypeSelected(type) },
+                            label = { Text(type) }
+                        )
+                    }
                 }
+            }
 
-            } else {
-
-                // PET LIST
-                items(
-                    items = pets,
-                    key = { pet -> pet.id }
-                ) { pet ->
-
-                    PetCard(
-                        pet = pet,
-                        onClick = {
-                            onPetClick(pet.id)
+            // SORT
+            item {
+                OutlinedButton(
+                    onClick = onSortClick,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        if (uiState.sortAscending) {
+                            "Sort: A to Z"
+                        } else {
+                            "Sort: Z to A"
                         }
                     )
                 }
             }
 
+            // SIMULATE ERROR
+            item {
+                OutlinedButton(
+                    onClick = onSimulateError,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Simulate Loading Error")
+                }
+            }
+
+            // FOUR UI STATES
+            when {
+                uiState.isLoading -> {
+                    item {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                uiState.error != null -> {
+                    item {
+                        Column {
+                            Text(
+                                text = uiState.error,
+                                color = MaterialTheme.colorScheme.error
+                            )
+
+                            Spacer(Modifier.height(8.dp))
+
+                            Button(onClick = onRetry) {
+                                Text("Retry")
+                            }
+                        }
+                    }
+                }
+
+                uiState.pets.isEmpty() -> {
+                    item {
+                        EmptyPetsState()
+                    }
+                }
+
+                else -> {
+                    items(
+                        items = uiState.pets,
+                        key = { pet -> pet.id }
+                    ) { pet ->
+                        PetCard(
+                            pet = pet,
+                            onClick = {
+                                onPetClick(pet.id)
+                            }
+                        )
+                    }
+                }
+            }
+
             // ADD PET BUTTON
             item {
-                Spacer(
-                    modifier = Modifier.height(8.dp)
-                )
+                Spacer(Modifier.height(8.dp))
 
                 Button(
                     onClick = onAddPetClick,
@@ -158,7 +223,6 @@ fun HomeScreen(
     }
 }
 
-
 // REUSABLE COMPOSABLE 1
 @Composable
 fun CareTipCard(
@@ -169,7 +233,8 @@ fun CareTipCard(
         modifier = modifier,
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
+            containerColor =
+                MaterialTheme.colorScheme.secondaryContainer
         )
     ) {
         Text(
@@ -182,7 +247,6 @@ fun CareTipCard(
         )
     }
 }
-
 
 // REUSABLE COMPOSABLE 2
 @Composable
@@ -197,82 +261,145 @@ fun EmptyPetsState(
             modifier = Modifier.padding(20.dp)
         ) {
             Text(
-                text = "No pets yet",
+                text = "No pets found",
                 style = MaterialTheme.typography.titleMedium
             )
 
-            Spacer(
-                modifier = Modifier.height(6.dp)
-            )
+            Spacer(Modifier.height(6.dp))
 
             Text(
-                text = "Add your first pet to start using PawPal.",
+                text = "Add a pet or change your search filters.",
                 style = MaterialTheme.typography.bodyMedium
             )
         }
     }
 }
 
-
-// HOME SCREEN LIGHT PREVIEW
-@Preview(
-    name = "Home Screen Light",
-    showBackground = true
+// PREVIEW DATA
+private val previewPets = listOf(
+    Pet(
+        id = 1,
+        name = "Buddy",
+        type = "Dog",
+        age = "3",
+        breed = "Golden Retriever"
+    ),
+    Pet(
+        id = 2,
+        name = "Luna",
+        type = "Cat",
+        age = "2",
+        breed = "British Shorthair"
+    )
 )
+
+// CONTENT PREVIEW
+@Preview(name = "Content", showBackground = true)
 @Composable
-fun HomeScreenLightPreview() {
-    PawPalTheme(
-        darkTheme = false
-    ) {
+fun HomeContentPreview() {
+    PawPalTheme {
         HomeScreen(
-            pets = pets,
+            uiState = HomeUiState(pets = previewPets),
             onPetClick = {},
-            onAddPetClick = {}
+            onAddPetClick = {},
+            onSearchChange = {},
+            onTypeSelected = {},
+            onSortClick = {},
+            onRetry = {},
+            onSimulateError = {}
         )
     }
 }
 
+// LOADING PREVIEW
+@Preview(name = "Loading", showBackground = true)
+@Composable
+fun HomeLoadingPreview() {
+    PawPalTheme {
+        HomeScreen(
+            uiState = HomeUiState(isLoading = true),
+            onPetClick = {},
+            onAddPetClick = {},
+            onSearchChange = {},
+            onTypeSelected = {},
+            onSortClick = {},
+            onRetry = {},
+            onSimulateError = {}
+        )
+    }
+}
 
-// HOME SCREEN DARK PREVIEW
+// EMPTY PREVIEW
+@Preview(name = "Empty", showBackground = true)
+@Composable
+fun HomeEmptyPreview() {
+    PawPalTheme {
+        HomeScreen(
+            uiState = HomeUiState(),
+            onPetClick = {},
+            onAddPetClick = {},
+            onSearchChange = {},
+            onTypeSelected = {},
+            onSortClick = {},
+            onRetry = {},
+            onSimulateError = {}
+        )
+    }
+}
+
+// ERROR PREVIEW
+@Preview(name = "Error", showBackground = true)
+@Composable
+fun HomeErrorPreview() {
+    PawPalTheme {
+        HomeScreen(
+            uiState = HomeUiState(
+                error = "Failed to load pets"
+            ),
+            onPetClick = {},
+            onAddPetClick = {},
+            onSearchChange = {},
+            onTypeSelected = {},
+            onSortClick = {},
+            onRetry = {},
+            onSimulateError = {}
+        )
+    }
+}
+
+// DARK MODE PREVIEW
 @Preview(
-    name = "Home Screen Dark",
+    name = "Dark Mode",
     showBackground = true,
     uiMode = Configuration.UI_MODE_NIGHT_YES
 )
 @Composable
-fun HomeScreenDarkPreview() {
-    PawPalTheme(
-        darkTheme = true
-    ) {
+fun HomeDarkPreview() {
+    PawPalTheme(darkTheme = true) {
         HomeScreen(
-            pets = pets,
+            uiState = HomeUiState(pets = previewPets),
             onPetClick = {},
-            onAddPetClick = {}
+            onAddPetClick = {},
+            onSearchChange = {},
+            onTypeSelected = {},
+            onSortClick = {},
+            onRetry = {},
+            onSimulateError = {}
         )
     }
 }
 
-
-// CARE TIP COMPONENT PREVIEW
-@Preview(
-    name = "Care Tip",
-    showBackground = true
-)
+// CARE TIP PREVIEW
+@Preview(name = "Care Tip", showBackground = true)
 @Composable
 fun CareTipCardPreview() {
     PawPalTheme {
-        CareTipCard(
-            tip = "🩺 Vet Check"
-        )
+        CareTipCard(tip = "🩺 Vet Check")
     }
 }
 
-
-// EMPTY STATE COMPONENT PREVIEW
-@Preview(
-    name = "Empty Pets State",
-    showBackground = true
-)
+// EMPTY COMPONENT PREVIEW
+@Preview(name = "Empty Component", showBackground = true)
 @Composable
 fun EmptyPetsStatePreview() {
     PawPalTheme {

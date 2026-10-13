@@ -109,6 +109,33 @@ class HomeViewModel(
         }
     }
 
+    fun addPet(pet: Pet) {
+        allPets = allPets + pet
+        saveAndRefresh()
+    }
+
+    fun deletePet(petId: Int) {
+        allPets = allPets.filterNot { it.id == petId }
+        saveAndRefresh()
+    }
+
+    private fun saveAndRefresh() {
+        updateVisiblePets()
+
+        viewModelScope.launch {
+            repository.savePets(allPets)
+        }
+    }
+
+    fun simulateError() {
+        repository.shouldFail = true
+        loadPets()
+    }
+
+    fun retryAfterError() {
+        repository.shouldFail = false
+        loadPets()
+    }
     override fun onCleared() {
         Log.d("PawPalLifecycle", "HomeViewModel cleared")
         super.onCleared()
