@@ -9,7 +9,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 fun HomeRoute(
     homeViewModel: HomeViewModel,
     onPetClick: (Int) -> Unit,
-    onAddPetClick: () -> Unit
+    onAddPetClick: () -> Unit,
+    onTipsClick: () -> Unit
 ) {
     val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
 
@@ -17,6 +18,7 @@ fun HomeRoute(
         uiState = uiState,
         onPetClick = onPetClick,
         onAddPetClick = onAddPetClick,
+        onTipsClick = onTipsClick,
         onSearchChange = homeViewModel::onSearchChange,
         onTypeSelected = homeViewModel::onTypeSelected,
         onSortClick = homeViewModel::onSortClick,

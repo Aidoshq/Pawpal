@@ -20,6 +20,7 @@ fun HomeScreen(
     uiState: HomeUiState,
     onPetClick: (Int) -> Unit,
     onAddPetClick: () -> Unit,
+    onTipsClick: () -> Unit = {},
     onSearchChange: (String) -> Unit,
     onTypeSelected: (String) -> Unit,
     onSortClick: () -> Unit,
@@ -79,7 +80,7 @@ fun HomeScreen(
                 }
             }
 
-            // PET CARE
+            // PET CARE TITLE
             item {
                 Text(
                     text = "Pet Care",
@@ -87,6 +88,7 @@ fun HomeScreen(
                 )
             }
 
+            // PET CARE CARDS
             item {
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -94,6 +96,27 @@ fun HomeScreen(
                     items(careTips) { tip ->
                         CareTipCard(tip = tip)
                     }
+                }
+            }
+
+            // LIVE REST API - SIS5
+            item {
+                Text(
+                    text = "Daily Inspiration (Live API)",
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
+
+            // OPEN API SCREEN
+            item {
+                Button(
+                    onClick = onTipsClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(18.dp)
+                ) {
+                    Text("View Online Tips")
                 }
             }
 
@@ -159,7 +182,7 @@ fun HomeScreen(
                 }
             }
 
-            // FOUR UI STATES
+            // FOUR PET UI STATES
             when {
                 uiState.isLoading -> {
                     item {
@@ -302,6 +325,7 @@ fun HomeContentPreview() {
             uiState = HomeUiState(pets = previewPets),
             onPetClick = {},
             onAddPetClick = {},
+            onTipsClick = {},
             onSearchChange = {},
             onTypeSelected = {},
             onSortClick = {},
@@ -320,6 +344,7 @@ fun HomeLoadingPreview() {
             uiState = HomeUiState(isLoading = true),
             onPetClick = {},
             onAddPetClick = {},
+            onTipsClick = {},
             onSearchChange = {},
             onTypeSelected = {},
             onSortClick = {},
@@ -338,6 +363,7 @@ fun HomeEmptyPreview() {
             uiState = HomeUiState(),
             onPetClick = {},
             onAddPetClick = {},
+            onTipsClick = {},
             onSearchChange = {},
             onTypeSelected = {},
             onSortClick = {},
@@ -358,6 +384,7 @@ fun HomeErrorPreview() {
             ),
             onPetClick = {},
             onAddPetClick = {},
+            onTipsClick = {},
             onSearchChange = {},
             onTypeSelected = {},
             onSortClick = {},
@@ -380,6 +407,7 @@ fun HomeDarkPreview() {
             uiState = HomeUiState(pets = previewPets),
             onPetClick = {},
             onAddPetClick = {},
+            onTipsClick = {},
             onSearchChange = {},
             onTypeSelected = {},
             onSortClick = {},
@@ -406,3 +434,4 @@ fun EmptyPetsStatePreview() {
         EmptyPetsState()
     }
 }
+

@@ -78,13 +78,6 @@ fun PetCard(
                 )
 
                 // PET TYPE
-                Text(
-                    text = pet.type,
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.titleSmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
 
                 Spacer(
                     modifier = Modifier.height(6.dp)
@@ -98,6 +91,13 @@ fun PetCard(
                     overflow = TextOverflow.Ellipsis
                 )
             }
+            Text(
+                text = pet.type,
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
 
             Text(
                 text = "›",

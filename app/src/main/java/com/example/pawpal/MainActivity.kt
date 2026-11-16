@@ -84,11 +84,17 @@ fun PawPalApp() {
         composable("home") {
             HomeRoute(
                 homeViewModel = homeViewModel,
+
                 onPetClick = { petId ->
                     navController.navigate("detail/$petId")
                 },
+
                 onAddPetClick = {
                     navController.navigate("addPet")
+                },
+
+                onTipsClick = {
+                    navController.navigate("tips")
                 }
             )
         }
@@ -99,6 +105,7 @@ fun PawPalApp() {
                 onBackClick = {
                     navController.popBackStack()
                 },
+
                 onSavePet = { name, type, breed, age ->
 
                     val newId =
@@ -155,6 +162,7 @@ fun PawPalApp() {
                     },
 
                     onTaskCompletedChange = { taskId, completed ->
+
                         val index = taskList.indexOfFirst {
                             it.id == taskId
                         }
@@ -313,6 +321,11 @@ fun PawPalApp() {
                     }
                 )
             }
+        }
+
+        // TIPS SCREEN - SIS5
+        composable("tips") {
+            TipsScreen()
         }
     }
 }
