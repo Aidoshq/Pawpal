@@ -1,16 +1,23 @@
+
 package com.example.pawpal
 
+import android.app.TimePickerDialog
 import android.content.res.Configuration
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.pawpal.ui.theme.PawPalTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.pawpal.ui.theme.PawPalTheme
+import java.util.Calendar
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,6 +45,26 @@ fun CareTaskScreen(
     }
 
     val isEditing = existingTask != null
+    val context = LocalContext.current
+
+    val timePicker = remember(context) {
+        val calendar = Calendar.getInstance()
+
+        TimePickerDialog(
+            context,
+            { _, hour, minute ->
+                time = String.format(
+                    Locale.US,
+                    "%02d:%02d",
+                    hour,
+                    minute
+                )
+            },
+            calendar.get(Calendar.HOUR_OF_DAY),
+            calendar.get(Calendar.MINUTE),
+            true
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -52,9 +79,7 @@ fun CareTaskScreen(
                     )
                 },
                 navigationIcon = {
-                    TextButton(
-                        onClick = onBackClick
-                    ) {
+                    TextButton(onClick = onBackClick) {
                         Text("←")
                     }
                 }
@@ -73,12 +98,8 @@ fun CareTaskScreen(
             // TASK NAME
             OutlinedTextField(
                 value = title,
-                onValueChange = {
-                    title = it
-                },
-                label = {
-                    Text("Task Name")
-                },
+                onValueChange = { title = it },
+                label = { Text("Task Name") },
                 placeholder = {
                     Text("Enter task name")
                 },
@@ -87,57 +108,54 @@ fun CareTaskScreen(
                 shape = RoundedCornerShape(16.dp)
             )
 
-            Spacer(
-                modifier = Modifier.height(18.dp)
-            )
+            Spacer(modifier = Modifier.height(18.dp))
 
             // PET
             OutlinedTextField(
                 value = pet.name,
                 onValueChange = {},
-                label = {
-                    Text("Pet")
-                },
+                label = { Text("Pet") },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = false,
                 singleLine = true,
                 shape = RoundedCornerShape(16.dp)
             )
 
-            Spacer(
-                modifier = Modifier.height(18.dp)
-            )
+            Spacer(modifier = Modifier.height(18.dp))
 
-            // TIME
+            // REMINDER TIME
             OutlinedTextField(
                 value = time,
-                onValueChange = {
-                    time = it
-                },
-                label = {
-                    Text("Time")
-                },
+                onValueChange = {},
+                label = { Text("Reminder Time") },
                 placeholder = {
-                    Text("Example: 9:00 PM")
+                    Text("Select time")
                 },
                 modifier = Modifier.fillMaxWidth(),
+                readOnly = true,
+                trailingIcon = {
+                    IconButton(
+                        onClick = {
+                            timePicker.show()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AccessTime,
+                            contentDescription = "Select time"
+                        )
+                    }
+                },
                 singleLine = true,
                 shape = RoundedCornerShape(16.dp)
             )
 
-            Spacer(
-                modifier = Modifier.height(18.dp)
-            )
+            Spacer(modifier = Modifier.height(18.dp))
 
             // NOTES
             OutlinedTextField(
                 value = notes,
-                onValueChange = {
-                    notes = it
-                },
-                label = {
-                    Text("Notes")
-                },
+                onValueChange = { notes = it },
+                label = { Text("Notes") },
                 placeholder = {
                     Text("Add any additional notes...")
                 },
@@ -147,11 +165,9 @@ fun CareTaskScreen(
                 shape = RoundedCornerShape(16.dp)
             )
 
-            Spacer(
-                modifier = Modifier.height(28.dp)
-            )
+            Spacer(modifier = Modifier.height(28.dp))
 
-            // SAVE
+            // SAVE TASK
             Button(
                 onClick = {
                     if (
@@ -159,7 +175,7 @@ fun CareTaskScreen(
                         time.isNotBlank()
                     ) {
                         onSaveTask(
-                            title,
+                            title.trim(),
                             time,
                             notes
                         )
@@ -180,12 +196,10 @@ fun CareTaskScreen(
                 )
             }
 
-            // DELETE - only visible when editing
+            // DELETE TASK
             if (isEditing && onDeleteTask != null) {
 
-                Spacer(
-                    modifier = Modifier.height(14.dp)
-                )
+                Spacer(modifier = Modifier.height(14.dp))
 
                 OutlinedButton(
                     onClick = onDeleteTask,
@@ -204,12 +218,12 @@ fun CareTaskScreen(
                 }
             }
 
-            Spacer(
-                modifier = Modifier.height(20.dp)
-            )
+            Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }
+
+// LIGHT PREVIEW
 @Preview(
     name = "Care Task Light",
     showBackground = true
@@ -232,6 +246,7 @@ fun CareTaskScreenLightPreview() {
     }
 }
 
+// DARK PREVIEW
 @Preview(
     name = "Care Task Dark",
     showBackground = true,

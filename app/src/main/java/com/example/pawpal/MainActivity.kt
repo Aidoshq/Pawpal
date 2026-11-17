@@ -1,12 +1,17 @@
-
 package com.example.pawpal
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -60,6 +65,47 @@ fun PawPalApp() {
 
     val context = LocalContext.current
     val navController = rememberNavController()
+
+    // NOTIFICATION PERMISSION
+    var notificationPermissionGranted by remember {
+        mutableStateOf(
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    val notificationPermissionLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission()
+        ) { isGranted ->
+            notificationPermissionGranted = isGranted
+
+            if (isGranted) {
+                Log.d(
+                    "PawPalNotifications",
+                    "Permission granted"
+                )
+            } else {
+                Log.w(
+                    "PawPalNotifications",
+                    "Permission denied"
+                )
+            }
+        }
+
+    LaunchedEffect(Unit) {
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            !notificationPermissionGranted
+        ) {
+            notificationPermissionLauncher.launch(
+                Manifest.permission.POST_NOTIFICATIONS
+            )
+        }
+    }
 
     val homeViewModel: HomeViewModel = viewModel()
 
@@ -161,10 +207,11 @@ fun PawPalApp() {
                         )
                     },
 
+                    // COMPLETE / UNCOMPLETE TASK
                     onTaskCompletedChange = { taskId, completed ->
 
                         val index = taskList.indexOfFirst {
-                            it.id == taskId
+                            it.id == taskId && it.petId == pet.id
                         }
 
                         if (index != -1) {
@@ -177,10 +224,34 @@ fun PawPalApp() {
                                 context,
                                 taskList
                             )
+
+                            if (completed) {
+                                ReminderScheduler.cancelReminder(
+                                    context,
+                                    taskId
+                                )
+                            } else {
+                                ReminderScheduler.scheduleReminder(
+                                    context,
+                                    taskList[index],
+                                    pet.name
+                                )
+                            }
                         }
                     },
 
+                    // DELETE PET
                     onDeletePet = {
+
+                        taskList
+                            .filter { it.petId == pet.id }
+                            .forEach { task ->
+                                ReminderScheduler.cancelReminder(
+                                    context,
+                                    task.id
+                                )
+                            }
+
                         taskList.removeAll {
                             it.petId == pet.id
                         }
@@ -250,6 +321,12 @@ fun PawPalApp() {
                             taskList
                         )
 
+                        ReminderScheduler.scheduleReminder(
+                            context,
+                            newTask,
+                            pet.name
+                        )
+
                         navController.popBackStack()
                     }
                 )
@@ -273,7 +350,9 @@ fun PawPalApp() {
             val taskId = backStackEntry.arguments?.getInt("taskId")
 
             val pet = petList.find { it.id == petId }
-            val task = taskList.find { it.id == taskId }
+            val task = taskList.find {
+                it.id == taskId && it.petId == petId
+            }
 
             if (pet != null && task != null) {
                 CareTaskScreen(
@@ -291,23 +370,44 @@ fun PawPalApp() {
                         }
 
                         if (index != -1) {
-                            taskList[index] =
-                                task.copy(
-                                    title = title,
-                                    time = time,
-                                    notes = notes
-                                )
+                            val updatedTask = task.copy(
+                                title = title,
+                                time = time,
+                                notes = notes
+                            )
+
+                            taskList[index] = updatedTask
 
                             LocalStorage.saveTasks(
                                 context,
                                 taskList
                             )
+
+                            if (!updatedTask.isCompleted) {
+                                ReminderScheduler.scheduleReminder(
+                                    context,
+                                    updatedTask,
+                                    pet.name
+                                )
+                            } else {
+                                ReminderScheduler.cancelReminder(
+                                    context,
+                                    updatedTask.id
+                                )
+                            }
                         }
 
                         navController.popBackStack()
                     },
 
+                    // DELETE TASK
                     onDeleteTask = {
+
+                        ReminderScheduler.cancelReminder(
+                            context,
+                            task.id
+                        )
+
                         taskList.removeAll {
                             it.id == task.id
                         }
