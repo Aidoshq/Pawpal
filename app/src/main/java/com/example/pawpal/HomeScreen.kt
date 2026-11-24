@@ -21,6 +21,7 @@ fun HomeScreen(
     onPetClick: (Int) -> Unit,
     onAddPetClick: () -> Unit,
     onTipsClick: () -> Unit = {},
+    onNearMeClick: () -> Unit = {},
     onSearchChange: (String) -> Unit,
     onTypeSelected: (String) -> Unit,
     onSortClick: () -> Unit,
@@ -117,6 +118,19 @@ fun HomeScreen(
                     shape = RoundedCornerShape(18.dp)
                 ) {
                     Text("View Online Tips")
+                }
+            }
+
+            // NEAR ME FEATURE
+            item {
+                OutlinedButton(
+                    onClick = onNearMeClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(18.dp)
+                ) {
+                    Text("📍 Near Me")
                 }
             }
 
@@ -326,6 +340,7 @@ fun HomeContentPreview() {
             onPetClick = {},
             onAddPetClick = {},
             onTipsClick = {},
+            onNearMeClick = {},
             onSearchChange = {},
             onTypeSelected = {},
             onSortClick = {},
@@ -345,6 +360,7 @@ fun HomeLoadingPreview() {
             onPetClick = {},
             onAddPetClick = {},
             onTipsClick = {},
+            onNearMeClick = {},
             onSearchChange = {},
             onTypeSelected = {},
             onSortClick = {},
@@ -364,6 +380,7 @@ fun HomeEmptyPreview() {
             onPetClick = {},
             onAddPetClick = {},
             onTipsClick = {},
+            onNearMeClick = {},
             onSearchChange = {},
             onTypeSelected = {},
             onSortClick = {},
@@ -385,6 +402,7 @@ fun HomeErrorPreview() {
             onPetClick = {},
             onAddPetClick = {},
             onTipsClick = {},
+            onNearMeClick = {},
             onSearchChange = {},
             onTypeSelected = {},
             onSortClick = {},
@@ -408,6 +426,7 @@ fun HomeDarkPreview() {
             onPetClick = {},
             onAddPetClick = {},
             onTipsClick = {},
+            onNearMeClick = {},
             onSearchChange = {},
             onTypeSelected = {},
             onSortClick = {},
@@ -434,4 +453,3 @@ fun EmptyPetsStatePreview() {
         EmptyPetsState()
     }
 }
-

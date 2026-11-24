@@ -10,7 +10,8 @@ fun HomeRoute(
     homeViewModel: HomeViewModel,
     onPetClick: (Int) -> Unit,
     onAddPetClick: () -> Unit,
-    onTipsClick: () -> Unit
+    onTipsClick: () -> Unit,
+    onNearMeClick: () -> Unit
 ) {
     val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
 
@@ -19,6 +20,7 @@ fun HomeRoute(
         onPetClick = onPetClick,
         onAddPetClick = onAddPetClick,
         onTipsClick = onTipsClick,
+        onNearMeClick = onNearMeClick,
         onSearchChange = homeViewModel::onSearchChange,
         onTypeSelected = homeViewModel::onTypeSelected,
         onSortClick = homeViewModel::onSortClick,
